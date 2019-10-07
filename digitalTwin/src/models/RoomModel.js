@@ -5,7 +5,7 @@ const HEATING_ACTION = 1
 
 const INTERVAL_TIME = 3 * 1000
 
-exports.PhysicalAsset = class PhysicalAsset {
+exports.RoomModel = class RoomModel {
 
     constructor(){
         this.temperature = INITIAL_TEMP
@@ -25,7 +25,7 @@ exports.PhysicalAsset = class PhysicalAsset {
 
 }
 
-exports.PhysicalAssetOperator = class PhysicalAssetOperator {
+exports.RoomModelOperator = class RoomModelOperator {
 
     constructor(physicalAsset){
         this.physicalAsset = physicalAsset

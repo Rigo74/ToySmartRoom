@@ -10,8 +10,17 @@ function operationAccepted(res){
     res.status(202).end()
 }
 
-exports.getTemperature = (_, res) => {
+exports.getRoomTemperature = (_, res) => {
     res.send({temperature: physicalAsset.getTemperature()})
+}
+
+exports.setRoomTemperature = (req, res) => {
+    physicalAsset.setTemperature(req.body.temperature)
+    res.status(200).end()
+}
+
+exports.getRoomState = (_, res) => {
+    res.send({state: controller.getState()})
 }
 
 exports.cool = (_, res) => {

@@ -23,6 +23,10 @@ exports.RoomModel = class RoomModel {
         return this.temperature
     }
 
+    setTemperature(newTemperature) {
+        this.temperature = newTemperature
+    }
+
 }
 
 exports.RoomModelOperator = class RoomModelOperator {
@@ -31,6 +35,14 @@ exports.RoomModelOperator = class RoomModelOperator {
         this.physicalAsset = physicalAsset
         this.intervalId = null
         this.operationId = null
+    }
+
+    getState() {
+        switch(this.operationId){
+            case HEATING_ACTION: return "HEATING"
+            case COOLING_ACTION: return "COOLING"
+            default: return "STOPPED"
+        }
     }
 
     startHeating() {

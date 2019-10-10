@@ -15,7 +15,7 @@ exports.getRoomTemperature = (_, res) => {
 }
 
 exports.setRoomTemperature = (req, res) => {
-    physicalAsset.setTemperature(req.body.temperature)
+    physicalAsset.setTemperature(parseInt(req.body.temperature))
     res.status(200).end()
 }
 

@@ -22,11 +22,16 @@
     </header>
     <main class="row">
         <div class="col-8 mx-auto mb-4 border rounded border-info p-3">
-            <div class="form-group">
-                <label for="temp-range">Select the room's current temperature (15°C - 40°C)</label>
-                <input type="range" min="15" max="40" value="28" class="custom-range" id="temp-range" onchange="updateSelectedTemperature()"/>
+            <div class="form-group mb-0">
+                <label for="temp-range">Select the room's current temperature</label>
+                <input type="range" class="custom-range" id="temp-range" onchange="updateSelectedTemperature()"/>
             </div>
-            Selected temperature: <span id="selected-temperature">28</span>°C
+            <div class="row mt-0">
+                <div class="col text-left" id="min-temp"></div>
+                <div class="col text-center" id="mid-temp"></div>
+                <div class="col text-right" id="max-temp"></div>
+            </div>
+            Selected temperature: <span id="selected-temperature"></span>°C
         </div>
         <div class="col-8 mx-auto border rounded border-secondary p-3">
             Current temperature: <span id="current-room-temperature"></span>°C <br/>

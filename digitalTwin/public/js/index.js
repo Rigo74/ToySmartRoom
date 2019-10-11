@@ -3,6 +3,10 @@ const selectedTemperature = document.getElementById("selected-temperature")
 const roomTemperature = document.getElementById("current-room-temperature")
 const roomState = document.getElementById("current-room-state")
 
+const minTemp = 15
+const maxTemp = 45
+const defaultTemp = (minTemp + maxTemp) / 2
+
 function retrieveRoomData() {
     retrieveRoomTemperature()
     retrieveRoomState()
@@ -32,5 +36,18 @@ function updateSelectedTemperature() {
         .catch(err => console.log(err))
 }
 
-retrieveRoomData()
-setInterval(() => retrieveRoomData(), 1000)
+function main() {
+    temperatureSelector.setAttribute("min", minTemp)
+    temperatureSelector.setAttribute("max", maxTemp)
+    temperatureSelector.value = defaultTemp
+
+    document.getElementById("min-temp").innerHTML = minTemp
+    document.getElementById("mid-temp").innerHTML = defaultTemp
+    document.getElementById("max-temp").innerHTML = maxTemp
+    selectedTemperature.innerHTML = defaultTemp
+
+    retrieveRoomData()
+    setInterval(() => retrieveRoomData(), 1000)
+}
+
+main()

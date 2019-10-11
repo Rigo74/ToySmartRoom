@@ -54,14 +54,14 @@ case class DigitalTwinModel(private val host: String, private val port: Int) {
 
   private def blockingCallWithResult(request: HttpRequest[Buffer]): JsonObject = {
     val semaphore = new Semaphore(0)
-    var result = Option.empty
+    var result = JsonObject
     request.send(ar => {
       if (ar.succeeded())
-        result = Some(ar.result().bodyAsJsonObject())
+        result = ar.result().bodyAsJsonObject()
       semaphore.release()
     })
     semaphore.acquire()
-    result get
+    result
   }
 
   private def blockingCallWithoutResult(request: HttpRequest[Buffer]): Unit = {

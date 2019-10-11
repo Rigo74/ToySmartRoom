@@ -36,7 +36,7 @@ class GoalThermostat(private val model: DigitalTwinModel, private val goalTemper
   }
 }
 
-object ThermostatApp extends App {
+object ThermostatApp1 extends App {
   val digitalTwinHost = "localhost"
   val digitalTwinPort = 3000
   val temperature = 23

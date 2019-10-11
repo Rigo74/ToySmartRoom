@@ -1,6 +1,6 @@
 package model
 
-import java.util.concurrent.Semaphore
+import java.util.concurrent.CompletableFuture
 
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
@@ -48,25 +48,24 @@ case class DigitalTwinModel(private val host: String, private val port: Int) {
 
   def stop(): Unit = postBlocking(STOP)
 
-  private def getBlocking(action: Action): JsonObject = blockingCallWithResult(client.get(port, host, action route))
+  private def getBlocking(action: Action): JsonObject = blockingCallWithResult(client.get(port, host, action.route))
 
-  private def postBlocking(action: Action): Unit = blockingCallWithoutResult(client.post(port, host, action route))
+  private def postBlocking(action: Action): Unit = blockingCallWithoutResult(client.post(port, host, action.route))
 
   private def blockingCallWithResult(request: HttpRequest[Buffer]): JsonObject = {
-    val semaphore = new Semaphore(0)
-    var result = JsonObject
-    request.send(ar => {
-      if (ar.succeeded())
-        result = ar.result().bodyAsJsonObject()
-      semaphore.release()
-    })
-    semaphore.acquire()
-    result
+    val future = new CompletableFuture[JsonObject]()
+    request send(ar =>
+      future complete (
+        if (ar.succeeded()) ar.result.bodyAsJsonObject
+        else new JsonObject()
+      )
+    )
+    future get()
   }
 
   private def blockingCallWithoutResult(request: HttpRequest[Buffer]): Unit = {
-    val semaphore = new Semaphore(0)
-    request.send(_ => semaphore.release())
-    semaphore.acquire()
+    val future = new CompletableFuture[Any]()
+    request.send(_ => future complete())
+    future get()
   }
 }

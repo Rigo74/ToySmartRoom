@@ -1,10 +1,13 @@
 import model.DigitalTwinModel
 
-class MaintenanceThermostat(private val model: DigitalTwinModel, private val idealTemperature: Int) extends Thread {
+class UserThermostat(private val model: DigitalTwinModel, private val startTemperature: Int) extends Thread {
+
+  private val userView = new UserView
 
   private val threshold: Double = 0.5
-  private val minTemp = this.idealTemperature - this.threshold
-  private val maxTemp = this.idealTemperature + this.threshold
+  private var idealTemperature = this.startTemperature
+  private var minTemp = this.startTemperature - this.threshold
+  private var maxTemp = this.startTemperature + this.threshold
 
   private var state: State = STOPPED
   private var roomTemperature: Option[Double] = None
@@ -33,13 +36,21 @@ class MaintenanceThermostat(private val model: DigitalTwinModel, private val ide
       case _ => UNKNOWN
     }
     this.roomTemperature = model.getTemperature
+    val temperature = userView.getCurrentUserTemperature
+    temperature
+      .filter(temp => temp != idealTemperature)
+      .ifPresent(temp => {
+        idealTemperature = temp
+        minTemp = temp - this.threshold
+        maxTemp = temp + this.threshold
+      })
   }
 }
 
-object ThermostatApp2 extends App {
+object ThermostatApp3 extends App {
   val digitalTwinHost = "localhost"
   val digitalTwinPort = 3000
   val temperature = 23
   val digitalTwinModel = DigitalTwinModel(digitalTwinHost, digitalTwinPort)
-  new MaintenanceThermostat(digitalTwinModel, temperature).start()
+  new UserThermostat(digitalTwinModel, temperature).start()
 }

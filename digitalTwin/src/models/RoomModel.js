@@ -3,7 +3,7 @@ const INITIAL_TEMP = 28
 const COOLING_ACTION = 0
 const HEATING_ACTION = 1
 
-const INTERVAL_TIME = 3 * 1000
+const INTERVAL_TIME = 1 * 1000
 
 exports.RoomModel = class RoomModel {
 

@@ -17,4 +17,4 @@ app.use(function(req, res) {
     res.status(404).send({url: req.originalUrl + ' not found'})
 })
 
-app.listen(3000,() => console.log(`Web Server now listening on port 3000!`))
+app.listen(3000,() => console.log(`Room Digital Twin now listening on port 3000!`))

@@ -1,65 +1,53 @@
-import io.vertx.core.Vertx
-import io.vertx.ext.web.client.WebClient
+import model.DigitalTwinModel
 
-trait Route {
-  val route: String
+trait State {
+  val text: String
 }
-
-object HEAT extends Route {
-  override val route: String = "/action/heat"
+object STOPPED extends State {
+  val text = "STOPPED"
 }
-object COOL extends Route {
-  override val route: String = "/action/cool"
+object COOLING extends State {
+  val text = "COOLING"
 }
-object STOP extends Route {
-  override val route: String = "/action/stop"
+object HEATING extends State {
+  val text = "HEATING"
 }
-object TEMPERATURE extends Route {
-  override val route: String = "/temperature"
+object UNKNOWN extends State {
+  val text = "UNKNOWN"
 }
 
-class SimpleThermostat(private val digitalTwinHost: String,
-                            private val digitalTwinPort: Int,
-                            private val temperature: Int) extends Thread {
+class SimpleThermostat(private val model: DigitalTwinModel, private val temperature: Int) extends Thread {
 
   private val threshold: Double = 0.5
   private val minTemp = this.temperature - this.threshold
   private val maxTemp = this.temperature + this.threshold
-  private val vertx: Vertx = Vertx.vertx()
-  private val client: WebClient = WebClient.create(vertx)
+  private var hasToWork = true
 
   override def run() {
-    work()
-  }
-
-  private def work(): Unit = {
-    client.get(digitalTwinPort, digitalTwinHost, TEMPERATURE.route)
-      .send(ar => {
-        if (ar.succeeded()) {
-          val result = ar.result().bodyAsJsonObject()
-          if (result.containsKey("temperature")) {
-            val currentTemperature = result.getDouble("temperature", 0.0)
-            println(currentTemperature)
-            (currentTemperature match {
-              case temp if temp >= this.minTemp && temp <= this.maxTemp => client.post(digitalTwinPort, digitalTwinHost, STOP.route)//.send(_ => println("start heat"))
-              case temp if temp < this.minTemp => client.post(digitalTwinPort, digitalTwinHost, HEAT.route)//.send(_ => println("start cool"))
-              case temp if temp > this.maxTemp => client.post(digitalTwinPort, digitalTwinHost, COOL.route)//.send(_ => println("stop"))
-            }).send(ar => work())
-          } else {
-            work()
-          }
-        } else {
-          work()
-        }
+    while(hasToWork) {
+      val state = model getState match {
+        case Some(s) if s == STOPPED.text => STOPPED
+        case Some(s) if s == HEATING.text => HEATING
+        case Some(s) if s == COOLING.text => COOLING
+        case _ => UNKNOWN
       }
-      )
+      model getTemperature match {
+        case Some(temp) if temp < this.minTemp && state != HEATING => model.startHeating()
+        case Some(temp) if temp > this.maxTemp && state != COOLING => model.startCooling()
+        case Some(temp) if temp >= this.minTemp && temp <= this.maxTemp && state != STOPPED =>
+          model.stop()
+          hasToWork = false
+        case _ =>
+      }
+    }
+    println("GOAL ACHIEVED: the temperature in the room is now " + temperature)
   }
-
 }
 
 object Thermostat extends App {
   val digitalTwinHost = "localhost"
   val digitalTwinPort = 3000
   val temperature = 23
-  new SimpleThermostat(digitalTwinHost, digitalTwinPort, temperature).start()
+  val digitalTwinModel = DigitalTwinModel(digitalTwinHost, digitalTwinPort)
+  new SimpleThermostat(digitalTwinModel, temperature).start()
 }
